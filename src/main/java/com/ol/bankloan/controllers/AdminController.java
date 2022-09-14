@@ -1,15 +1,9 @@
 package com.ol.bankloan.controllers;
 
 import com.ol.bankloan.dao.*;
-import com.ol.bankloan.dto.AddLoanDTO;
-import com.ol.bankloan.dto.BasicResponseDTO;
-import com.ol.bankloan.dto.RegisterRequestDTO;
-import com.ol.bankloan.dto.RegisterResponseDTO;
+import com.ol.bankloan.dto.*;
 import com.ol.bankloan.enums.UserRoleEnum;
-import com.ol.bankloan.models.Customer;
-import com.ol.bankloan.models.Loan;
-import com.ol.bankloan.models.Payment;
-import com.ol.bankloan.models.User;
+import com.ol.bankloan.models.*;
 import com.ol.bankloan.services.UserDetailsService;
 import com.ol.bankloan.utils.JWTUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,12 +44,14 @@ public class AdminController {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private UserDetailsService userDetailsService;
+    @Autowired
+    EmployeeDAO employeeDAO;
 
     private final ModelMapper mapper = new ModelMapper();
 
     @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping("/add-employee")
-    public ResponseEntity<BasicResponseDTO<RegisterResponseDTO>> registerEmployee(@RequestBody RegisterRequestDTO registerRequestDTO) {
+    public ResponseEntity<BasicResponseDTO<RegisterResponseDTO>> registerEmployee(@RequestBody RegisterEmpRequestDTO registerRequestDTO) {
         BasicResponseDTO<RegisterResponseDTO> basicResponseDTO = new BasicResponseDTO<>();
         basicResponseDTO.setData(null);
         basicResponseDTO.setSuccess(false);
@@ -70,23 +67,38 @@ public class AdminController {
         user.setRole(UserRoleEnum.EMPLOYEE);
         user.setPassword(passwordEncoder.encode(registerRequestDTO.getPassword()));
         userDAO.save(user);
+        Employee employee = new Employee();
+        employee.setUser(user);
+        employee.setSalary(registerRequestDTO.getSalary());
+        employee.setHireDate(registerRequestDTO.getHireDate());
+        employee.setDesignation(registerRequestDTO.getDesignation());
+        employeeDAO.save(employee);
         final UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
 
         basicResponseDTO.setData(new RegisterResponseDTO(jwtUtil.generateToken(userDetails), user.getEmail(), user.getFirstName()));
         basicResponseDTO.setSuccess(true);
+        basicResponseDTO.setMessage("Employee created successfully");
         return new ResponseEntity<>(basicResponseDTO, HttpStatus.CREATED);
     }
 
     @Operation(security = @SecurityRequirement(name = "bearerAuth"))
-    @DeleteMapping("/remove-employee/{userId}")
-    public ResponseEntity<BasicResponseDTO<?>> removeEmployee(@PathVariable("userId") Long userId){
-        userDAO.deleteById(userId);
-        return new ResponseEntity<>(new BasicResponseDTO<>(true, "Records deleted", null), HttpStatus.OK);
+    @Transactional
+    @DeleteMapping("/remove-employee/{empId}")
+    public ResponseEntity<BasicResponseDTO<?>> removeEmployee(@PathVariable("empId") Long empId){
+        Optional<Employee> _emp = employeeDAO.findById(empId);
+        if(_emp.isPresent()){
+            User user = _emp.get().getUser();
+            employeeDAO.deleteById(empId);
+            userDAO.delete(user);
+            return new ResponseEntity<>(new BasicResponseDTO<>(true, "Records deleted", null), HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(new BasicResponseDTO<>(false, "Records not found", null), HttpStatus.OK);
     }
     @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping("/list-employees")
-    public ResponseEntity<BasicResponseDTO<List<User>>> removeEmployee(){
-        List<User> users = userDAO.findAllByRole(UserRoleEnum.EMPLOYEE);
+    public ResponseEntity<BasicResponseDTO<List<Employee>>> listAllEmployee(){
+        List<Employee> users = employeeDAO.findAll();
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "All records", users), HttpStatus.OK);
     }
     @Operation(security = @SecurityRequirement(name = "bearerAuth"))

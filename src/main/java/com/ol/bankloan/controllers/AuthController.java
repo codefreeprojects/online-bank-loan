@@ -41,11 +41,11 @@ public class AuthController {
         basicResponseDTO.setSuccess(false);
         if( !registerRequestDTO.getPassword().equals(registerRequestDTO.getConfirmPassword()) ){
             basicResponseDTO.setMessage("Password and confirm password not matched");
-            return new ResponseEntity<>(basicResponseDTO, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(basicResponseDTO, HttpStatus.OK);
         }
         if(userDAO.existsByEmail(registerRequestDTO.getEmail())){
             basicResponseDTO.setMessage("User already exists");
-            return new ResponseEntity<>(basicResponseDTO, HttpStatus.CONFLICT);
+            return new ResponseEntity<>(basicResponseDTO, HttpStatus.OK);
         }
         User user = registerRequestDTO.getUserByThisDTO();
         user.setPassword(passwordEncoder.encode(registerRequestDTO.getPassword()));
@@ -54,6 +54,7 @@ public class AuthController {
 
         basicResponseDTO.setData(new RegisterResponseDTO(jwtUtil.generateToken(userDetails), user.getEmail(), user.getFirstName()));
         basicResponseDTO.setSuccess(true);
+        basicResponseDTO.setMessage("User successfully added");
         return new ResponseEntity<>(basicResponseDTO, HttpStatus.CREATED);
     }
 
@@ -63,7 +64,7 @@ public class AuthController {
                 loginRequestDTO.getEmail(),
                 loginRequestDTO.getPassword()
         );
-        return new ResponseEntity<>(result, result.isSuccess() ? HttpStatus.OK : HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(result,HttpStatus.OK);
     }
     public BasicResponseDTO<LoginResponseDTO> loginHelper(String email, String password) {
         BasicResponseDTO<LoginResponseDTO> basicResponseDTO = new BasicResponseDTO<>();

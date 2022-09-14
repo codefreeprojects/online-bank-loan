@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -76,7 +77,15 @@ public class EmployeeController {
 
     @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     @DeleteMapping("/remove-customer/{customerId}")
+    @Transactional
     public ResponseEntity<BasicResponseDTO<?>> removeCustomer( @PathVariable("customerId") Long customerId){
+        Optional<Customer> _cust = customerDAO.findById(customerId);
+        if(_cust.isEmpty()){
+            return new ResponseEntity<>(new BasicResponseDTO<>(false, "Customer not found", null), HttpStatus.OK);
+        }
+        Customer customer = _cust.get();
+        emiDAO.deleteByCustomer(customer);
+        paymentDAO.deleteByCustomer(customer);
         customerDAO.deleteById(customerId);
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "Deleted successfully", null), HttpStatus.OK);
     }

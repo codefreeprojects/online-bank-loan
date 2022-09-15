@@ -6,8 +6,6 @@ import com.ol.bankloan.models.Address;
 import com.ol.bankloan.models.User;
 import com.ol.bankloan.dao.UserDAO;
 import com.ol.bankloan.dto.BasicResponseDTO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,13 +25,11 @@ public class AddressController {
     UserDAO userDAO;
 
     private final ModelMapper mapper = new ModelMapper();
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping("/all")
     public ResponseEntity<BasicResponseDTO<List<Address>>> allAddress(){
         List<Address> addresses = addressDAO.findAll();
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "Address saved", addresses), HttpStatus.OK);
     }
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping("/save/{userId}")
     public ResponseEntity<BasicResponseDTO<Address>> saveAddress(@RequestBody AddAddressRequestDTO addressDto, @PathVariable("userId") Long userId){
         Address address = this.mapper.map(addressDto, Address.class);

@@ -33,6 +33,15 @@ public class UserController {
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "User deleted", null), HttpStatus.OK);
     }
 
+    @GetMapping("/details/{userId}")
+    public ResponseEntity<BasicResponseDTO<User>> userDetails( @PathVariable(value = "userId") Long userId){
+        Optional<User> _user =  userDAO.findById(userId);
+        if(_user.isEmpty()){
+            return new ResponseEntity<>(new BasicResponseDTO<>(false, "User not found", null), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(new BasicResponseDTO<>(true, "User found", _user.get()), HttpStatus.OK);
+    }
+
 
     @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     @PutMapping("/update/{userId}")

@@ -105,6 +105,10 @@ public class AdminController {
     @PostMapping("/add-laon-type")
     public ResponseEntity<BasicResponseDTO<Loan>> addLoanType(@RequestBody AddLoanDTO addLoanDTO){
         Loan loan = this.mapper.map(addLoanDTO, Loan.class);
+        Optional<Loan> l = loanDAO.findByLoanType(addLoanDTO.getLoanType());
+        if(l.isPresent()){
+            loan.setId(l.get().getId());
+        }
         loanDAO.save(loan);
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "Record saved", loan), HttpStatus.OK);
     }

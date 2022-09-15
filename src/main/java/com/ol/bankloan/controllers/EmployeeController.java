@@ -4,6 +4,7 @@ import com.ol.bankloan.dao.*;
 import com.ol.bankloan.dto.ApplyLoanDTO;
 import com.ol.bankloan.dto.BasicResponseDTO;
 import com.ol.bankloan.enums.LoanStatusEnum;
+import com.ol.bankloan.enums.UserRoleEnum;
 import com.ol.bankloan.models.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -74,6 +75,18 @@ public class EmployeeController {
         List<EMI> emis = emiDAO.findAll();
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "All records", emis), HttpStatus.OK);
     }
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    @GetMapping("/customer-list")
+    public ResponseEntity<BasicResponseDTO<List<Customer>>> viewCustomers(){
+        List<Customer> customers = customerDAO.findAll();
+        return new ResponseEntity<>(new BasicResponseDTO<>(true, "All records", customers), HttpStatus.OK);
+    }
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    @GetMapping("/users-list")
+    public ResponseEntity<BasicResponseDTO<List<User>>> viewUsers(){
+        List<User> users = userDAO.findAllByRole(UserRoleEnum.CUSTOMER);
+        return new ResponseEntity<>(new BasicResponseDTO<>(true, "All records", users), HttpStatus.OK);
+    }
 
     @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     @DeleteMapping("/remove-customer/{customerId}")
@@ -112,20 +125,20 @@ public class EmployeeController {
     }
 
     @Operation(security = @SecurityRequirement(name = "bearerAuth"))
-    @PostMapping("/add-customer/{loanId}")
-    public ResponseEntity<BasicResponseDTO<Customer>> applyForLoan(@PathVariable("loanId") Long loanId, @RequestBody ApplyLoanDTO applyLoanDTO){
+    @PostMapping("/add-customer")
+    public ResponseEntity<BasicResponseDTO<Customer>> applyForLoan( @RequestBody ApplyLoanDTO applyLoanDTO){
         Customer customer = this.mapper.map(applyLoanDTO, Customer.class);
-        Optional<Loan> _loan = loanDAO.findById(loanId);
+        Optional<Loan> _loan = loanDAO.findById(applyLoanDTO.getLoanId());
         Optional<User> _user = userDAO.findById(applyLoanDTO.getUser_id());
         if(_user.isPresent() && _loan.isPresent()){
             if(!addressDAO.existsByUser(_user.get())){
-                return new ResponseEntity<>(new BasicResponseDTO<>(false, "Please add address details first before apply for loan", null), HttpStatus.CONFLICT);
+                return new ResponseEntity<>(new BasicResponseDTO<>(false, "Please add address details first before apply for loan", null), HttpStatus.OK);
             }
             customer.setLoanStatus(LoanStatusEnum.PENDING);
             customer.setUser(_user.get());
             customer.setLoan(_loan.get());
             customerDAO.save(customer);
-            return new ResponseEntity<>(new BasicResponseDTO<>(true, "Record found", customer), HttpStatus.OK);
+            return new ResponseEntity<>(new BasicResponseDTO<>(true, "Customer Added", customer), HttpStatus.OK);
         }
         return new ResponseEntity<>(new BasicResponseDTO<>(false, "User or loan not found", null), HttpStatus.OK);
     }

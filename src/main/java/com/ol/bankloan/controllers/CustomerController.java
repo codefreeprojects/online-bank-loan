@@ -77,6 +77,19 @@ public class CustomerController {
         return new ResponseEntity<>(new BasicResponseDTO<>(false, "No record found", null), HttpStatus.OK);
     }
     @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    @GetMapping("/emi/{userId}")
+    public ResponseEntity<BasicResponseDTO<List<EMI>>> getEmilDetails(@PathVariable("userId") Long userId){
+        Optional<User> _user = userDAO.findById(userId);
+        if(_user.isEmpty())
+            return new ResponseEntity<>(new BasicResponseDTO<>(false, "No record found", null), HttpStatus.OK);
+        Optional<Customer> customer = customerDAO.findByUser(_user.get());
+        if(customer.isPresent()){
+            List<EMI> emis = emiDAO.findAllByCustomer(customer.get());
+            return new ResponseEntity<>(new BasicResponseDTO<>(true, "Record found", emis), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(new BasicResponseDTO<>(false, "No record found", null), HttpStatus.OK);
+    }
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping("/apply-for-loan/{loanId}")
     public ResponseEntity<BasicResponseDTO<Customer>> applyForLoan(@PathVariable("loanId") Long loanId, @RequestBody ApplyLoanDTO applyLoanDTO){
         Customer customer = this.mapper.map(applyLoanDTO, Customer.class);

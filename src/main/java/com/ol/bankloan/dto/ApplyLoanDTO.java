@@ -10,6 +10,7 @@ import java.util.Date;
 @Data @NoArgsConstructor @AllArgsConstructor
 public class ApplyLoanDTO {
     private Long user_id;
+    private Long loanId;
     private String panNumber;
     private Double loanAmount;
     private GenderEnum gender;

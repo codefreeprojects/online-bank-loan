@@ -6,8 +6,7 @@ import com.ol.bankloan.enums.UserRoleEnum;
 import com.ol.bankloan.models.*;
 import com.ol.bankloan.services.UserDetailsService;
 import com.ol.bankloan.utils.JWTUtil;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -49,7 +48,7 @@ public class AdminController {
 
     private final ModelMapper mapper = new ModelMapper();
 
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @PostMapping("/add-employee")
     public ResponseEntity<BasicResponseDTO<RegisterResponseDTO>> registerEmployee(@RequestBody RegisterEmpRequestDTO registerRequestDTO) {
         BasicResponseDTO<RegisterResponseDTO> basicResponseDTO = new BasicResponseDTO<>();
@@ -81,7 +80,7 @@ public class AdminController {
         return new ResponseEntity<>(basicResponseDTO, HttpStatus.CREATED);
     }
 
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @Transactional
     @DeleteMapping("/remove-employee/{empId}")
     public ResponseEntity<BasicResponseDTO<?>> removeEmployee(@PathVariable("empId") Long empId){
@@ -95,13 +94,11 @@ public class AdminController {
 
         return new ResponseEntity<>(new BasicResponseDTO<>(false, "Records not found", null), HttpStatus.OK);
     }
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping("/list-employees")
     public ResponseEntity<BasicResponseDTO<List<Employee>>> listAllEmployee(){
         List<Employee> users = employeeDAO.findAll();
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "All records", users), HttpStatus.OK);
     }
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping("/add-laon-type")
     public ResponseEntity<BasicResponseDTO<Loan>> addLoanType(@RequestBody AddLoanDTO addLoanDTO){
         Loan loan = this.mapper.map(addLoanDTO, Loan.class);
@@ -112,7 +109,7 @@ public class AdminController {
         loanDAO.save(loan);
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "Record saved", loan), HttpStatus.OK);
     }
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @PutMapping("/update-laon-type/{loanId}")
     public ResponseEntity<BasicResponseDTO<Loan>> updateLoanType(@RequestBody AddLoanDTO addLoanDTO, @PathVariable("loanId") Long loanId){
         Loan loan = this.mapper.map(addLoanDTO, Loan.class);
@@ -124,19 +121,19 @@ public class AdminController {
         loanDAO.save(loan);
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "Record updated", loan), HttpStatus.OK);
     }
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @GetMapping("/view-all-loans")
     public ResponseEntity<BasicResponseDTO<List<Customer>>> viewLoanApplications(){
         List<Customer> customers = customerDAO.findAll();
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "All records", customers), HttpStatus.OK);
     }
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @GetMapping("/view-payment")
     public ResponseEntity<BasicResponseDTO<List<Payment>>> viewPaymentDetails(){
         List<Payment> payments = paymentDAO.findAll();
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "All records", payments), HttpStatus.OK);
     }
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @GetMapping("/view-payment/{paymentId}")
     public ResponseEntity<BasicResponseDTO<Payment>> viewPaymentDetail(@PathVariable("paymentId") Long paymentId){
         Optional<Payment> _payment = paymentDAO.findById(paymentId);

@@ -9,9 +9,6 @@ import com.ol.bankloan.models.Customer;
 import com.ol.bankloan.models.EMI;
 import com.ol.bankloan.models.Loan;
 import com.ol.bankloan.models.User;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -42,7 +39,7 @@ public class CustomerController {
 
     private final ModelMapper mapper = new ModelMapper();
 
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @PutMapping("/edit-profile/{userId}")
     public ResponseEntity<BasicResponseDTO<User>> editProfile(@PathVariable("userId") Long userId, @RequestBody EditProfileReqDTO editProfileReqDTO){
         User user = this.mapper.map(editProfileReqDTO, User.class);
@@ -60,13 +57,13 @@ public class CustomerController {
     }
 
 
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @GetMapping("/view-types-of-loans")
     public ResponseEntity<BasicResponseDTO<List<Loan>>> getAllLoanTypes(){
         List<Loan> loans = loanDAO.findAll();
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "", loans), HttpStatus.OK);
     }
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @GetMapping("/emi-details/{customerId}")
     public ResponseEntity<BasicResponseDTO<List<EMI>>> getALlEmilDetails(@PathVariable("customerId") Long customerId){
         Optional<Customer> customer = customerDAO.findById(customerId);
@@ -76,7 +73,7 @@ public class CustomerController {
         }
         return new ResponseEntity<>(new BasicResponseDTO<>(false, "No record found", null), HttpStatus.OK);
     }
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @GetMapping("/emi/{userId}")
     public ResponseEntity<BasicResponseDTO<List<EMI>>> getEmilDetails(@PathVariable("userId") Long userId){
         Optional<User> _user = userDAO.findById(userId);
@@ -89,7 +86,7 @@ public class CustomerController {
         }
         return new ResponseEntity<>(new BasicResponseDTO<>(false, "No record found", null), HttpStatus.OK);
     }
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @PostMapping("/apply-for-loan/{loanId}")
     public ResponseEntity<BasicResponseDTO<Customer>> applyForLoan(@PathVariable("loanId") Long loanId, @RequestBody ApplyLoanDTO applyLoanDTO){
         Customer customer = this.mapper.map(applyLoanDTO, Customer.class);

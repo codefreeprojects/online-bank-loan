@@ -6,13 +6,12 @@ import com.ol.bankloan.dto.BasicResponseDTO;
 import com.ol.bankloan.enums.LoanStatusEnum;
 import com.ol.bankloan.enums.UserRoleEnum;
 import com.ol.bankloan.models.*;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
+
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
@@ -41,7 +40,7 @@ public class EmployeeController {
 
     private final ModelMapper mapper = new ModelMapper();
 
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @GetMapping("/approve-loan/{customerId}")
     public ResponseEntity<BasicResponseDTO<EMI>> approveLoan(@PathVariable("customerId") Long customerId){
         Optional<Customer> _customer = customerDAO.findById(customerId);
@@ -63,32 +62,32 @@ public class EmployeeController {
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "", emiM), HttpStatus.OK);
     }
 
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @GetMapping("/view-all-loans")
     public ResponseEntity<BasicResponseDTO<List<Customer>>> viewLoanApplications(){
         List<Customer> customers = customerDAO.findAll();
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "All records", customers), HttpStatus.OK);
     }
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @GetMapping("/view-all-borrowers")
     public ResponseEntity<BasicResponseDTO<List<EMI>>> viewBorrowers(){
         List<EMI> emis = emiDAO.findAll();
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "All records", emis), HttpStatus.OK);
     }
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @GetMapping("/customer-list")
     public ResponseEntity<BasicResponseDTO<List<Customer>>> viewCustomers(){
         List<Customer> customers = customerDAO.findAll();
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "All records", customers), HttpStatus.OK);
     }
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @GetMapping("/users-list")
     public ResponseEntity<BasicResponseDTO<List<User>>> viewUsers(){
         List<User> users = userDAO.findAllByRole(UserRoleEnum.CUSTOMER);
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "All records", users), HttpStatus.OK);
     }
 
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @DeleteMapping("/remove-customer/{customerId}")
     @Transactional
     public ResponseEntity<BasicResponseDTO<?>> removeCustomer( @PathVariable("customerId") Long customerId){
@@ -103,7 +102,7 @@ public class EmployeeController {
         return new ResponseEntity<>(new BasicResponseDTO<>(true, "Deleted successfully", null), HttpStatus.OK);
     }
 
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @GetMapping("/make-payment")
     public ResponseEntity<BasicResponseDTO<Payment>> makePayment(@RequestParam("customerId") Long customerId, @RequestParam("emiId") Long emiId){
         Optional<Customer> _customer = customerDAO.findById(customerId);
@@ -124,7 +123,7 @@ public class EmployeeController {
         return new ResponseEntity<>(new BasicResponseDTO<>(false, "Payment or EMI not found", null), HttpStatus.OK);
     }
 
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+
     @PostMapping("/add-customer")
     public ResponseEntity<BasicResponseDTO<Customer>> applyForLoan( @RequestBody ApplyLoanDTO applyLoanDTO){
         Customer customer = this.mapper.map(applyLoanDTO, Customer.class);
